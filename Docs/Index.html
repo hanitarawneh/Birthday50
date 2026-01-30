@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3amo Zain v50.0</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #0f1620;
+      --text: #d7e1ea;
+      --muted: #8aa0b2;
+      --accent: #7ee787;
+      --warn: #ffcc66;
+      --danger: #ff6b6b;
+      --border: rgba(255,255,255,0.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(126,231,135,0.12), transparent 60%),
+                  radial-gradient(1000px 500px at 90% 10%, rgba(255,204,102,0.10), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .terminal {
+      width: min(900px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent 30%),
+                  var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .dots {
+      display: flex;
+      gap: 8px;
+      margin-right: 6px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      opacity: 0.9;
+    }
+    .dot.red { background: #ff5f56; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green { background: #27c93f; }
+
+    .title {
+      color: var(--muted);
+      font-size: 13px;
+      user-select: none;
+    }
+
+    .content {
+      padding: 18px 18px 22px;
+      font-size: 15px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .prompt { color: var(--accent); }
+    .muted { color: var(--muted); }
+    .warn { color: var(--warn); }
+    .danger { color: var(--danger); }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      animation: blink 1s step-end infinite;
+      color: var(--text);
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .btnrow {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.05s ease;
+    }
+
+    button:hover { background: rgba(255,255,255,0.07); }
+    button:active { transform: translateY(1px); }
+
+    .footer {
+      padding: 10px 18px 16px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal" role="img" aria-label="Terminal style birthday page">
+    <div class="bar">
+      <div class="dots">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
+      </div>
+      <div class="title">3amo-zain@birthday: ~ (v50.0 LTS)</div>
+    </div>
+
+    <div class="content" id="screen"></div>
+
+    <div class="footer">
+      Tip: tap “Run cake” for the important command 🎂
+      <div class="btnrow">
+        <button onclick="runCake()">Run cake</button>
+        <button onclick="runUptime()">Check uptime</button>
+        <button onclick="runLegend()">Legend mode</button>
+        <button onclick="resetScreen()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const screen = document.getElementById("screen");
+
+    const lines = [
+      { type: "cmd", text: "whoami" },
+      { type: "out", text: "3amo Zain — Instructor, Uncle, Certified Legend" },
+      { type: "cmd", text: "uname -a" },
+      { type: "out", text: "BirthdayOS 50.0.0 LTS x86_64 (stable release)" },
+      { type: "cmd", text: "echo \"Happy 50th Birthday!\"" },
+      { type: "out", text: "Happy 50th Birthday, 3amo Zain! 🎉🎂" },
+      { type: "out", text: "May your year be full of health, happiness, and low-latency joy." },
+      { type: "out", text: "" },
+      { type: "out", text: "Type: run cake   (or press the button below)" },
+    ];
+
+    let i = 0;
+
+    function addLine(html) {
+      screen.innerHTML += html + "\n";
+      screen.scrollTop = screen.scrollHeight;
+    }
+
+    function typeNext() {
+      if (i >= lines.length) {
+        addLine('<span class="muted">ready.</span> <span class="cursor">▍</span>');
+        return;
+      }
+
+      const item = lines[i++];
+      if (item.type === "cmd") {
+        addLine(`<span class="prompt">3amo-zain@birthday:~$</span> ${escapeHtml(item.text)}`);
+      } else {
+        addLine(`${escapeHtml(item.text)}`);
+      }
+
+      setTimeout(typeNext, 420);
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function runCake() {
+      addLine(`<span class="prompt">3amo-zain@birthday:~$</span> sudo apt-get install cake`);
+      addLine(`Reading package lists... Done`);
+      addLine(`Building dependency tree... Done`);
+      addLine(`<span class="warn">WARNING:</span> cake is already installed (x50 slices)`);
+      addLine(`🎂🎂🎂  Happy 50th Birthday 3amo Zain!  🎂🎂🎂`);
+      addLine(`<span class="muted">status:</span> 200 OK`);
+      addLine("");
+    }
+
+    function runUptime() {
+      addLine(`<span class="prompt">3amo-zain@birthday:~$</span> uptime`);
+      addLine(`up 50 years, 0 critical failures, load average: legendary`);
+      addLine("");
+    }
+
+    function runLegend() {
+      addLine(`<span class="prompt">3amo-zain@birthday:~$</span> enable --legend-mode`);
+      addLine(`Legend mode: <span class="warn">ENABLED</span>`);
+      addLine(`Teaching skill: MAX`);
+      addLine(`Uncle jokes: DEPLOYED`);
+      addLine("");
+    }
+
+    function resetScreen() {
+      screen.innerHTML = "";
+      i = 0;
+      typeNext();
+    }
+
+    // start typing
+    resetScreen();
+  </script>
+</body>
+</html>
